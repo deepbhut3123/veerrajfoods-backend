@@ -15,10 +15,10 @@ const orderSchema = new mongoose.Schema(
     area: { type: String, required: true },
     products: [productSchema],
     totalAmount: { type: Number, required: true },
-    weight: { type: String, required: true },
-    courier: { type: String, required: true },
-    trackingNumber: { type: String, required: true },
-    orderSource: { type: String, required: true}
+    weight: { type: String, required: false },
+    courier: { type: String, required: false },
+    trackingNumber: { type: String, required: false },
+    orderSource: { type: String, required: false}
   },
   { timestamps: true }
 );
