@@ -54,6 +54,61 @@ const salesController = {
     }
   },
 
+  // Get single sale by ID
+  getSingleSale: async (req, res) => {
+    try {
+      const sale = await Sale.findById(req.params.id).populate(
+        "dealer",
+        "dealerName"
+      );
+      if (!sale) {
+        return res.status(404).json({ message: "Sale not found" });
+      }
+      res.status(200).json(sale);
+    } catch (error) {
+      console.error("Error fetching sale:", error);
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  },
+
+  // Update sale
+  updateSale: async (req, res) => {
+    try {
+      const { date, dealerId, products, totalAmount } = req.body;
+
+      // Check dealer exists if dealerId is provided
+      if (dealerId) {
+        const dealer = await Dealer.findById(dealerId);
+        if (!dealer) {
+          return res.status(404).json({ message: "Dealer not found" });
+        }
+      }
+
+      const updatedSale = await Sale.findByIdAndUpdate(
+        req.params.id,
+        {
+          date,
+          dealer: dealerId,
+          products,
+          totalAmount,
+        },
+        { new: true }
+      ).populate("dealer", "dealerName");
+
+      if (!updatedSale) {
+        return res.status(404).json({ message: "Sale not found" });
+      }
+
+      res.status(200).json({
+        message: "Sale updated successfully",
+        sale: updatedSale,
+      });
+    } catch (error) {
+      console.error("Error updating sale:", error);
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  },
+
   deleteSales: async (req, res) => {
     try {
       const deletedSales = await Sale.findByIdAndDelete(req.params.id);

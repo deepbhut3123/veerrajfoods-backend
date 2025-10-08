@@ -14,6 +14,8 @@ router.delete("/dealers/:id/delete", dealerController.deleteDealer)
 
 router.post("/sales", salesController.createSale)
 router.get("/sales", salesController.getAllSales)
+router.get("/sales/:id", salesController.getSingleSale)
+router.put("/sales/:id/edit", salesController.updateSale)
 router.delete("/sales/:id/delete", salesController.deleteSales)
 router.post("/sales/export", salesController.exportToexcel)
 
