@@ -38,7 +38,16 @@ app.use(
     credentials: true, // optional: if you send cookies/auth
   })
 );
-
+// ✅ Manually handle preflight requests
+app.options(
+  "*",
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use("/api/public", express.static(path.join(__dirname, "public")));
 
