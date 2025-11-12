@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 // const RolesPermissions = require("../models/RolesPermissionsModel");
-const User = require("../models/userModel");
+const User = require("../models/usermodel");
 // const Menu = require("../models/MenuModel");
 
 const jwtkey = "jwttoken";
