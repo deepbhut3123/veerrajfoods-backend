@@ -9,6 +9,7 @@ const dealerSchema = new mongoose.Schema(
   {
     dealerName: { type: String, required: true },
     products: [productSchema],
+    amount: {type:Number}
   },
   { timestamps: true }
 );

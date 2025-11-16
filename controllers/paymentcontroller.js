@@ -1,27 +1,41 @@
 const Payment = require("../models/paymentmodel"); // adjust path if needed
+const Dealer = require("../models/dealermodel");
 const ExcelJS = require("exceljs");
 
 const payment = {
   // ✅ Add new order
   addPaymentdetail: async (req, res) => {
     try {
+      const { dealerId, totalAmount } = req.body;
+
+      // Validate dealer exists
+      const dealer = await Dealer.findById(dealerId);
+      if (!dealer) {
+        return res.status(404).json({
+          success: false,
+          message: "Dealer not found",
+        });
+      }
+
+      // ➖ SUBTRACT payment from dealer.amount
+      dealer.amount = (dealer.amount || 0) - totalAmount;
+      await dealer.save();
+
+      // Create payment entry
       const newPayment = new Payment(req.body);
       await newPayment.save();
-      res
-        .status(201)
-        .json({
-          success: true,
-          message: "Payment added successfully",
-          data: newPayment,
-        });
+
+      res.status(201).json({
+        success: true,
+        message: "Payment added successfully",
+        data: newPayment,
+      });
     } catch (error) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "Error creating payment",
-          error: error.message,
-        });
+      res.status(400).json({
+        success: false,
+        message: "Error creating payment",
+        error: error.message,
+      });
     }
   },
 
@@ -45,7 +59,7 @@ const payment = {
         query.orderDate = { $gte: startDate, $lte: endDate };
       }
 
-      const payments = await Payment.find(query).sort({ orderDate: -1 });
+      const payments = await Payment.find(query).sort({ orderDate: -1 }).populate("dealerId","dealerName");
 
       res.status(200).json({ success: true, data: payments });
     } catch (error) {
@@ -67,13 +81,11 @@ const payment = {
           .json({ success: false, message: "Payment not found" });
       res.status(200).json({ success: true, data: payment });
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Error fetching payment",
-          error: error.message,
-        });
+      res.status(500).json({
+        success: false,
+        message: "Error fetching payment",
+        error: error.message,
+      });
     }
   },
 
@@ -118,13 +130,11 @@ const payment = {
         .status(200)
         .json({ success: true, message: "Payment deleted successfully" });
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Error deleting payment",
-          error: error.message,
-        });
+      res.status(500).json({
+        success: false,
+        message: "Error deleting payment",
+        error: error.message,
+      });
     }
   },
 

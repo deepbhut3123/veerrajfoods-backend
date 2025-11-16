@@ -24,7 +24,11 @@ const salesController = {
 
       await sale.save();
 
-      // Populate dealer name for response
+      // ➕ ADD sale amount to dealer.amount
+      dealer.amount = (dealer.amount || 0) + totalAmount;
+      await dealer.save();
+
+      // Populate dealer name
       const savedSale = await Sale.findById(sale._id).populate(
         "dealer",
         "dealerName"
