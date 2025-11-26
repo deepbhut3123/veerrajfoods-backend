@@ -38,5 +38,6 @@ router.get("/expense", expenseController.getExpenses)
 router.get("/expense/:id", expenseController.getSingleExpense)
 router.put("/expense/:id/edit", expenseController.updateExpense)
 router.delete("/expense/:id/delete", expenseController.deleteExpense)
+router.post("/expense/export", expenseController.exportToexcel)
 
 module.exports = router;

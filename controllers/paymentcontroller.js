@@ -44,22 +44,78 @@ const payment = {
     try {
       const { search, startDate, endDate } = req.query;
 
-      let query = {};
+      // build match stage
+      const match = {};
 
-      // ✅ Search filter
-      if (search) {
-        query.$or = [
-          { dealerName: { $regex: search, $options: "i" } },
-          { totalAmount: { $regex: search, $options: "i" } },
-        ];
-      }
-
-      // ✅ Only apply date filter if user selected a range
+      // date range (only if provided)
       if (startDate && endDate) {
-        query.orderDate = { $gte: startDate, $lte: endDate };
+        match.orderDate = { $gte: startDate, $lte: endDate };
       }
 
-      const payments = await Payment.find(query).sort({ orderDate: -1 }).populate("dealerId","dealerName");
+      // if search provided, we will build an $or that checks:
+      //  - dealer.dealerName (from lookup)
+      //  - totalAmount (stringified using $toString + regexMatch)
+      let searchMatch = null;
+      if (search) {
+        // safe-escape regex special chars in search (optional)
+        const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        searchMatch = {
+          $or: [
+            { "dealer.dealerName": { $regex: escaped, $options: "i" } },
+            // use $expr + $regexMatch to match numeric/strings by stringifying totalAmount
+            {
+              $expr: {
+                $regexMatch: {
+                  input: { $toString: "$totalAmount" },
+                  regex: escaped,
+                  options: "i",
+                },
+              },
+            },
+          ],
+        };
+      }
+
+      // build pipeline
+      const pipeline = [
+        // initial filter by date if any
+        { $match: match },
+        // lookup dealer document
+        {
+          $lookup: {
+            from: "dealers", // verify your dealers collection name
+            localField: "dealerId",
+            foreignField: "_id",
+            as: "dealer",
+          },
+        },
+        // unwind dealer array (if some payments might not have dealer, you can keep empty with preserveNullAndEmptyArrays: true)
+        { $unwind: { path: "$dealer", preserveNullAndEmptyArrays: true } },
+      ];
+
+      // apply search-based match if provided
+      if (searchMatch) pipeline.push({ $match: searchMatch });
+
+      // sort (desc by orderDate)
+      pipeline.push({ $sort: { orderDate: -1 } });
+
+      // Optional: project/format output the same way as populate would
+      pipeline.push({
+        $project: {
+          _id: 1,
+          orderDate: 1,
+          totalAmount: 1,
+          paymentMode: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          dealerId: {
+            _id: "$dealer._id",
+            dealerName: "$dealer.dealerName",
+          },
+        },
+      });
+
+      const payments = await Payment.aggregate(pipeline);
 
       res.status(200).json({ success: true, data: payments });
     } catch (error) {
@@ -74,7 +130,10 @@ const payment = {
   // ✅ Get single order by ID
   getSinglePaymentdetail: async (req, res) => {
     try {
-      const payment = await Payment.findById(req.params.id);
+      const payment = await Payment.findById(req.params.id).populate(
+        "dealerId",
+        "dealerName"
+      );
       if (!payment)
         return res
           .status(404)
@@ -152,6 +211,7 @@ const payment = {
         { header: "Order Date", key: "orderDate", width: 15 },
         { header: "Dealer Name", key: "dealerName", width: 25 },
         { header: "Total Amount", key: "totalAmount", width: 15 },
+        { header: "Payment Mode", key: "paymentMode", width: 25},
       ];
 
       payments.forEach((payments) => {

@@ -9,6 +9,7 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
     totalAmount: { type: String, required: true },
+    paymentMode: { type: String, required: true},
   },
   { timestamps: true }
 );

@@ -6,7 +6,7 @@ const ExcelJS = require("exceljs");
 const salesController = {
   createSale: async (req, res) => {
     try {
-      const { date, dealerId, products, totalAmount } = req.body;
+      const { date, dealerId, products, totalAmount, kata, transport } = req.body;
 
       // Validate dealer exists
       const dealer = await Dealer.findById(dealerId);
@@ -20,6 +20,8 @@ const salesController = {
         dealer: dealerId,
         products,
         totalAmount,
+        kata,
+        transport,
       });
 
       await sale.save();
@@ -78,7 +80,7 @@ const salesController = {
   // Update sale
   updateSale: async (req, res) => {
     try {
-      const { date, dealerId, products, totalAmount } = req.body;
+      const { date, dealerId, products, totalAmount, kata, transport } = req.body;
 
       // Check dealer exists if dealerId is provided
       if (dealerId) {
@@ -95,6 +97,8 @@ const salesController = {
           dealer: dealerId,
           products,
           totalAmount,
+          kata,
+          transport,
         },
         { new: true }
       ).populate("dealer", "dealerName");
@@ -147,6 +151,8 @@ const salesController = {
         { header: "Quantity", key: "quantity", width: 12 },
         { header: "Product Total", key: "total", width: 18 },
         { header: "Sale Total", key: "saleTotal", width: 18 },
+        { header: "Kata", key: "kata", width: 12},
+        { header: "Transport", key: "transport", width: 18 },
       ];
 
       salesWithDealer.forEach((sale) => {
@@ -160,6 +166,8 @@ const salesController = {
             quantity: product.quantity,
             total: product.total,
             saleTotal: index === 0 ? sale.totalAmount : "",
+            kata: sale.kata,
+            transport: sale.transport,
           });
         });
       });

@@ -128,47 +128,42 @@ const expense = {
     }
   },
 
-  // exportToexcel: async (req, res) => {
-  //   try {
-  //     const { payload: orders } = req.body;
-  //     if (!orders || orders.length === 0) {
-  //       return res.status(400).json({ message: "No orders provided" });
-  //     }
+  exportToexcel: async (req, res) => {
+    try {
+      const { payload: expenses } = req.body;
+      if (!expenses || expenses.length === 0) {
+        return res.status(400).json({ message: "No expenses provided" });
+      }
 
-  //     const workbook = new ExcelJS.Workbook();
-  //     const worksheet = workbook.addWorksheet("Orders");
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Expenses");
 
-  //     worksheet.columns = [
-  //       { header: "Order Date", key: "orderDate", width: 15 },
-  //       { header: "Customer Name", key: "customerName", width: 25 },
-  //       { header: "Phone No", key: "phoneNo", width: 15 },
-  //       { header: "Area", key: "area", width: 20 },
-  //       { header: "Courier", key: "courier", width: 20 },
-  //       { header: "Tracking No", key: "trackingNumber", width: 25 },
-  //       { header: "Total Amount", key: "totalAmount", width: 15 },
-  //       { header: "Order Source", key: "orderSource", width: 15 },
-  //     ];
+      worksheet.columns = [
+        { header: "Date", key: "date", width: 18},
+        { header: "Description", key: "desc", width: 18},
+        { header: "Amount", key: "amount", width: 18}
+      ];
 
-  //     orders.forEach((order) => {
-  //       worksheet.addRow(order);
-  //     });
+      expenses.forEach((expense) => {
+        worksheet.addRow(expense);
+      });
 
-  //     res.setHeader(
-  //       "Content-Type",
-  //       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  //     );
-  //     res.setHeader(
-  //       "Content-Disposition",
-  //       "attachment; filename=Orders.xlsx"
-  //     );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=Orders.xlsx"
+      );
 
-  //     await workbook.xlsx.write(res);
-  //     res.end();
-  //   } catch (error) {
-  //     console.error("Excel export error:", error);
-  //     res.status(500).json({ message: "Failed to export orders" });
-  //   }
-  // }
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (error) {
+      console.error("Excel export error:", error);
+      res.status(500).json({ message: "Failed to export expenses" });
+    }
+  }
 };
 
 module.exports = expense;

@@ -17,6 +17,8 @@ const saleSchema = new mongoose.Schema(
     },
     products: [saleProductSchema],
     totalAmount: { type: Number, required: true },
+    kata: { type: Number, required: false},
+    transport: { type: Number, required: false}
   },
   { timestamps: true }
 );
