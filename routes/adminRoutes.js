@@ -5,6 +5,8 @@ const salesController = require("../controllers/salescontroller")
 const onlineOrderController = require("../controllers/onlineOrdercontroller")
 const paymentController = require("../controllers/paymentcontroller")
 const expenseController = require("../controllers/expensecontroller")
+const invoiceController = require("../controllers/invoiceController")
+const customerController = require("../controllers/customerCpntroller")
 
 router.post("/dealers", dealerController.addDealer);
 router.get("/dealers", dealerController.getAllDealers);
@@ -39,5 +41,19 @@ router.get("/expense/:id", expenseController.getSingleExpense)
 router.put("/expense/:id/edit", expenseController.updateExpense)
 router.delete("/expense/:id/delete", expenseController.deleteExpense)
 router.post("/expense/export", expenseController.exportToexcel)
+
+// customers
+router.post("/customers", customerController.addCustomer);
+router.get("/customers", customerController.getCustomers);
+
+// invoices under customer
+router.post(
+  "/customers/:customerId/invoices",
+  invoiceController.addInvoiceForCustomer
+);
+router.get(
+  "/customers/:customerId/invoices",
+  invoiceController.getInvoicesByCustomer
+);
 
 module.exports = router;
