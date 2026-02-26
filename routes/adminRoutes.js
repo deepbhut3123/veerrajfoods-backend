@@ -7,6 +7,7 @@ const paymentController = require("../controllers/paymentcontroller")
 const expenseController = require("../controllers/expensecontroller")
 const invoiceController = require("../controllers/invoiceController")
 const customerController = require("../controllers/customerCpntroller")
+const dashboardController = require("../controllers/dashboardcontroller")
 
 router.post("/dealers", dealerController.addDealer);
 router.get("/dealers", dealerController.getAllDealers);
@@ -55,5 +56,8 @@ router.get(
   "/customers/:customerId/invoices",
   invoiceController.getInvoicesByCustomer
 );
+
+// dashboard
+router.get("/dashboard/dealer-monthly-summary", dashboardController.getDealerMonthlySummary);
 
 module.exports = router;
