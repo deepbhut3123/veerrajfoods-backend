@@ -27,7 +27,11 @@ exports.getDealerMonthlySummary = async (req, res) => {
       {
         $group: {
           _id: { $month: "$date" },
-          totalSales: { $sum: "$totalAmount" },
+          totalSales: {
+            $sum: {
+              $round: ["$totalAmount", 0], // ✅ round & remove points
+            },
+          },
         },
       },
     ]);
